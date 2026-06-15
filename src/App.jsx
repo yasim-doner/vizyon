@@ -265,8 +265,6 @@ function App() {
             if (updated) {
               setSelectedMission(updated);
             }
-          } else if (data.length > 0) {
-            setSelectedMission(data[0]);
           }
         }
       })
@@ -353,21 +351,11 @@ function App() {
     showToast('Oturum kapatıldı', 'info');
   };
 
-  // Toggle log for a day
-  const handleToggleDay = (dayNum) => {
+  // Generic toggle log function
+  const toggleMissionLog = (mission, dateStr) => {
     // Only the assigned member can toggle their own calendar logs
     if (selectedUserId !== currentUser.id) {
       showToast('Sadece kendi görevlerinizi işaretleyebilirsiniz!', 'error');
-      return;
-    }
-
-    if (!selectedMission) return;
-
-    const { todayStr } = getServerTodayAndYesterday();
-    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-
-    if (dateStr > todayStr) {
-      showToast('Gelecek günleri işaretleyemezsiniz!', 'error');
       return;
     }
 
@@ -378,7 +366,7 @@ function App() {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        mission_id: selectedMission.id,
+        mission_id: mission.id,
         date: dateStr
       })
     })
@@ -389,14 +377,14 @@ function App() {
       .then(data => {
         // Toggle locally
         if (data.status === 'added') {
-          setMissionLogs(prev => [...prev, { mission_id: selectedMission.id, log_date: dateStr }]);
-          showToast('İşaretlendi', 'success');
+          setMissionLogs(prev => [...prev, { mission_id: mission.id, log_date: dateStr }]);
+          showToast(`"${mission.title}" işaretlendi`, 'success');
         } else {
           setMissionLogs(prev => prev.filter(l => {
             const formattedLd = l.log_date.substring(0, 10);
-            return !(l.mission_id === selectedMission.id && formattedLd === dateStr);
+            return !(l.mission_id === mission.id && formattedLd === dateStr);
           }));
-          showToast('İşaret kaldırıldı', 'info');
+          showToast(`"${mission.title}" işareti kaldırıldı`, 'info');
         }
         // Refresh account details, logs and missions
         fetchMissions();
@@ -404,6 +392,21 @@ function App() {
         fetchLeaderboardDetails();
       })
       .catch(err => showToast(err.message, 'error'));
+  };
+
+  // Toggle log for a day from calendar cell click
+  const handleToggleDay = (dayNum) => {
+    if (!selectedMission) return;
+
+    const { todayStr } = getServerTodayAndYesterday();
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+
+    if (dateStr > todayStr) {
+      showToast('Gelecek günleri işaretleyemezsiniz!', 'error');
+      return;
+    }
+
+    toggleMissionLog(selectedMission, dateStr);
   };
 
   // Save monthly mission details
@@ -1135,8 +1138,25 @@ function App() {
               )}
 
               <div className="panel-card">
-                <h2 className="panel-title">10 Temel Görev</h2>
+                <h2 className="panel-title">GÖREVLER</h2>
                 <div className="missions-menu">
+                  <button
+                    onClick={() => setSelectedMission(null)}
+                    className={`menu-item-btn ${selectedMission === null ? 'active' : ''}`}
+                    style={{ borderLeft: '4px solid var(--primary)', marginBottom: '0.4rem' }}
+                  >
+                    <div className="menu-item-left" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '1.1rem' }}>📋</span>
+                      <div>
+                        <span className="menu-item-title" style={{ fontWeight: '700' }}>Bugünün Görevleri</span>
+                        <div className="menu-item-meta">
+                          <span className="menu-item-interval" style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700' }}>
+                            Özet
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
                   {missions.map(m => (
                     <button
                       key={m.id}
@@ -1179,18 +1199,39 @@ function App() {
                     </div>
                     
                     {/* Streaks (Zincirler) display */}
-                    {selectedMission.interval !== 'monthly' && (
-                      <div className="streaks-display">
-                        <div className="streak-badge streak-current">
-                          <span className="streak-val">{currentStreak} Gün</span>
-                          <span className="streak-label">Mevcut Zincir</span>
+                    {selectedMission.interval !== 'monthly' && currentStreak > 0 && (() => {
+                      const fireScale = Math.min(0.25 + currentStreak * 0.06, 1.8);
+                      return (
+                        <div className="streaks-display">
+                          <div className="streak-badge streak-current" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '0.65rem', borderBottom: 'none', padding: '0.5rem 0.9rem' }}>
+                            <div className="fire-container" style={{ transform: `scale(${fireScale})`, transformOrigin: 'bottom center' }}>
+                              <div className="fire">
+                                <div className="flame"></div>
+                                <div className="flame"></div>
+                                <div className="flame"></div>
+                                <div className="flame"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                                <div className="spark"></div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <span className="streak-val" style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)' }}>{currentStreak} Gün</span>
+                              <span className="streak-label" style={{ margin: 0 }}>Mevcut Zincir</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="streak-badge streak-max">
-                          <span className="streak-val">{maxStreak} Gün</span>
-                          <span className="streak-label">En Uzun Zincir</span>
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
 
                   {/* Calendar controller */}
@@ -1291,8 +1332,98 @@ function App() {
                   )}
                 </div>
               ) : (
-                <div className="panel-card empty-state">
-                  Lütfen sol menüden takip etmek istediğiniz görevi seçin.
+                <div className="panel-card">
+                  <h2 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>📋</span> Bugünün Görevleri
+                  </h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                    Tarih: <strong>{serverDateStr}</strong>. Bugün henüz yapmadığınız günlük ve haftalık görevlerinizi buradan hızlıca işaretleyebilirsiniz.
+                  </p>
+
+                  <div className="checklist-items-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {missions
+                      .filter(m => m.interval === 'daily' || m.interval === 'weekly')
+                      .map(m => {
+                        const { todayStr } = getServerTodayAndYesterday();
+                        const isDone = missionLogs.some(
+                          l => l.mission_id === m.id && l.log_date.substring(0, 10) === todayStr
+                        );
+                        
+                        return (
+                          <div 
+                            key={m.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '0.85rem 1.2rem',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-color)',
+                              backgroundColor: isDone ? 'var(--completed-bg)' : 'var(--bg-main)',
+                              borderColor: isDone ? 'rgba(16, 185, 129, 0.25)' : 'var(--border-color)',
+                              transition: 'all 0.2s ease',
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => toggleMissionLog(m, todayStr)}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0, flex: 1, marginRight: '1rem' }}>
+                              <span style={{ 
+                                fontWeight: '600', 
+                                fontSize: '0.92rem', 
+                                textDecoration: isDone ? 'line-through' : 'none',
+                                color: isDone ? 'var(--text-secondary)' : 'var(--text-main)'
+                              }}>
+                                {m.title}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span style={{ 
+                                  fontSize: '0.68rem', 
+                                  fontWeight: '700',
+                                  padding: '0.1rem 0.35rem',
+                                  borderRadius: '4px',
+                                  backgroundColor: m.interval === 'daily' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(217, 119, 6, 0.12)',
+                                  color: m.interval === 'daily' ? '#2563eb' : '#d97706',
+                                  textTransform: 'uppercase'
+                                }}>
+                                  {m.interval === 'daily' ? 'Günlük' : 'Haftalık'}
+                                </span>
+                                {m.progress_text && (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                    • {m.progress_text}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <div style={{
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '6px',
+                                border: '2px solid',
+                                borderColor: isDone ? 'var(--primary)' : 'var(--border-color)',
+                                backgroundColor: isDone ? 'var(--primary)' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#ffffff',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                transition: 'all 0.2s ease'
+                              }}>
+                                {isDone && '✓'}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                    {missions.filter(m => m.interval === 'daily' || m.interval === 'weekly').length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                        Atanmış herhangi bir günlük veya haftalık göreviniz bulunmuyor.
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
