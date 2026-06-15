@@ -108,6 +108,23 @@ function App() {
   // Notification Toast state
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
+  // Background slideshow for landing page
+  const [bgIndex, setBgIndex] = useState(0);
+  const backgroundImages = [
+    '/gallery/bg1.jpg',
+    '/gallery/bg2.jpg',
+    '/gallery/bg3.jpg',
+    '/gallery/bg4.jpg'
+  ];
+
+  useEffect(() => {
+    if (currentUser) return;
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
   // Show Toast helper
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -857,29 +874,20 @@ function App() {
 
     if (selectedMission.title.includes('Makale') || selectedMission.title.includes('Video')) {
       return (
-        <div className="monthly-target-info">
-          <span>Aylık Hedef: 2 Rapor İçeriği Girişi (Tek Formda)</span>
-          <span className={`target-result ${isSucceeded ? 'success' : 'fail'}`}>
-            Durum: {isSucceeded ? 'Hedef Başarıldı! (Rapor Girildi)' : 'Eksik (Rapor Bekleniyor)'}
-          </span>
+        <div className={`target-result ${isSucceeded ? 'success' : 'fail'}`} style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+          Durum: {isSucceeded ? 'Hedef Başarıldı! (Rapor Girildi)' : 'Eksik (Rapor Bekleniyor)'}
         </div>
       );
     } else if (selectedMission.title.includes('Uyku')) {
       return (
-        <div className="monthly-target-info">
-          <span>Aylık Hedef: En az 15 Gün Uyku Düzeni</span>
-          <span className={`target-result ${isSucceeded ? 'success' : 'fail'}`}>
-            Korunan Gün Sayısı: {logsCount} / 15 ({isSucceeded ? 'Hedef Başarıldı!' : 'Eksik'})
-          </span>
+        <div className={`target-result ${isSucceeded ? 'success' : 'fail'}`} style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+          Durum: Korunan Gün Sayısı: {logsCount} / 15 ({isSucceeded ? 'Hedef Başarıldı!' : 'Eksik'})
         </div>
       );
     } else {
       return (
-        <div className="monthly-target-info">
-          <span>Aylık Hedef: En az 1 Rapor Girişi</span>
-          <span className={`target-result ${isSucceeded ? 'success' : 'fail'}`}>
-            Durum: {isSucceeded ? 'Tamamlandı ✓' : 'Tamamlanmadı'}
-          </span>
+        <div className={`target-result ${isSucceeded ? 'success' : 'fail'}`} style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+          Durum: {isSucceeded ? 'Tamamlandı ✓' : 'Tamamlanmadı'}
         </div>
       );
     }
@@ -893,6 +901,7 @@ function App() {
         <nav className="landing-nav">
           <div className="landing-nav-container">
             <a href="#page-top" className="landing-logo">
+              <img src="/icon.png" alt="Vizyon Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
               VİZYON
             </a>
             <ul className="landing-nav-links">
@@ -903,10 +912,28 @@ function App() {
         </nav>
 
         {/* Masthead (Hero) */}
-        <header className="landing-masthead">
-          <div className="masthead-content">
-            <h1 className="masthead-title">VİZYON</h1>
-            <h2 className="masthead-subtitle">
+        <header className="landing-masthead" style={{ position: 'relative', overflow: 'hidden' }}>
+          {backgroundImages.map((img, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `linear-gradient(rgba(10, 11, 14, 0.65), rgba(10, 11, 14, 0.85)), url(${img})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transform: `translateX(${(idx - bgIndex) * 100}%)`,
+                transition: 'transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                zIndex: 1
+              }}
+            />
+          ))}
+          <div className="masthead-content" style={{ position: 'relative', zIndex: 2 }}>
+            <h1 className="masthead-title" style={{ color: '#ffffff' }}>VİZYON</h1>
+            <h2 className="masthead-subtitle" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               Disiplin, kararlılık ve gelişim odaklı görev ve alışkanlık takip sistemi.
             </h2>
             <a href="#login" className="btn btn-primary btn-lg">Hemen Başla</a>
@@ -980,7 +1007,8 @@ function App() {
     <div className="dashboard-container">
       {/* Header */}
       <header className="dashboard-header">
-        <div className="header-logo">
+        <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img src="/icon.png" alt="Vizyon Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
           <span className="logo-text">VİZYON</span>
         </div>
 
@@ -1166,12 +1194,26 @@ function App() {
                   </div>
 
                   {/* Calendar controller */}
-                  <div className="calendar-navigator">
-                    <button onClick={handlePrevMonth} className="btn btn-secondary btn-sm">◄ Önceki Ay</button>
-                    <span className="current-month-display">
+                  <div className="calendar-navigator" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', margin: '0 auto 1.2rem auto' }}>
+                    <button 
+                      onClick={handlePrevMonth} 
+                      style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem', outline: 'none', transition: 'opacity 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                    >
+                      ◄
+                    </button>
+                    <span className="current-month-display" style={{ fontWeight: '600', fontSize: '1.05rem', margin: '0 0.2rem' }}>
                       {getMonthNameTurkish(currentDate.getMonth())} {currentDate.getFullYear()}
                     </span>
-                    <button onClick={handleNextMonth} className="btn btn-secondary btn-sm">Sonraki Ay ►</button>
+                    <button 
+                      onClick={handleNextMonth} 
+                      style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem', outline: 'none', transition: 'opacity 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                    >
+                      ►
+                    </button>
                   </div>
 
                   {/* Forecasted/Potential Penalty warning box */}
@@ -1236,22 +1278,17 @@ function App() {
                     </div>
                   )}
 
-                  {/* Extra reporting (Weekly sport metrics & Monthly goals status) */}
-                  <div className="mission-footer-reports">
-                    {selectedMission.interval === 'weekly' && (
+                  {/* Extra reporting (Weekly sport metrics) */}
+                  {selectedMission.interval === 'weekly' && (
+                    <div className="mission-footer-reports">
                       <div className="weekly-sports-report">
                         <h3 className="section-subtitle">Haftalık Spor Takibi (Hedef: Haftada en az 2 gün)</h3>
                         <div className="weekly-report-grid">
                           {getWeeklyWorkoutsReport()}
                         </div>
                       </div>
-                    )}
-                    
-                    <div className="monthly-summary-box">
-                      <h3 className="section-subtitle">Aylık Değerlendirme Özeti</h3>
-                      {getMonthlyTargetStatus()}
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <div className="panel-card empty-state">
@@ -1267,12 +1304,11 @@ function App() {
           <div className="panel-card scrollable-panel">
             <h2 className="panel-title">Liderlik Tablosu</h2>
 
-            <div className="leaderboards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
+            <div className="leaderboards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
               {/* Column 1: Bu Ayki Sıralama */}
               <div className="leaderboard-column">
                 <div className="leaderboard-header-align" style={{ height: '98px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', marginBottom: '2.5rem' }}>
-                  {/* Calendar controller */}
-                  <div className="calendar-navigator" style={{ maxWidth: '380px', margin: '0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div className="calendar-navigator" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', margin: '0 auto' }}>
                     <button 
                       onClick={() => {
                         const prevDate = new Date(leaderboardDate.getFullYear(), leaderboardDate.getMonth() - 1, 1);
@@ -1282,11 +1318,13 @@ function App() {
                         }
                         setLeaderboardDate(prevDate);
                       }} 
-                      className="btn btn-secondary btn-sm"
+                      style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem', outline: 'none', transition: 'opacity 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                     >
-                      ◄ Önceki Ay
+                      ◄
                     </button>
-                    <span className="current-month-display" style={{ fontWeight: '600', fontSize: '1.05rem', margin: '0 1rem' }}>
+                    <span className="current-month-display" style={{ fontWeight: '600', fontSize: '1.05rem', margin: '0 0.2rem' }}>
                       {getMonthNameTurkish(leaderboardDate.getMonth())} {leaderboardDate.getFullYear()}
                     </span>
                     <button 
@@ -1294,9 +1332,11 @@ function App() {
                         const nextDate = new Date(leaderboardDate.getFullYear(), leaderboardDate.getMonth() + 1, 1);
                         setLeaderboardDate(nextDate);
                       }} 
-                      className="btn btn-secondary btn-sm"
+                      style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem', outline: 'none', transition: 'opacity 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                     >
-                      Sonraki Ay ►
+                      ►
                     </button>
                   </div>
                 </div>
@@ -1339,9 +1379,6 @@ function App() {
               <div className="leaderboard-column">
                 <div className="leaderboard-header-align" style={{ height: '98px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', marginBottom: '2.5rem' }}>
                   <h3 className="section-subtitle" style={{ margin: '0 0 1rem 0' }}>Tüm Zamanların Sıralaması</h3>
-                  <div className="leaderboard-subtitle" style={{ margin: '0' }}>
-                    Kayıt Tarihinden İtibaren Toplam Başarı
-                  </div>
                 </div>
 
                 <div className="leaderboard-list">
