@@ -118,11 +118,12 @@ const initDB = async () => {
       )
     `);
 
-    // Seed Admin User (yasim / 0456558)
+    // Seed Admin User (yasim)
     const adminCheck = await client.query('SELECT * FROM users WHERE username = $1', ['yasim']);
     let adminId;
     if (adminCheck.rows.length === 0) {
-      const passwordHash = await bcrypt.hash('0456558', 10);
+      const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || 'default_admin_password_123';
+      const passwordHash = await bcrypt.hash(initialAdminPassword, 10);
       const adminRes = await client.query(
         'INSERT INTO users (username, password_hash, is_admin) VALUES ($1, $2, $3) RETURNING id',
         ['yasim', passwordHash, true]
