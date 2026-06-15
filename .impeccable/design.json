@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-15T16:43:00.000Z",
+  "title": "Design System: Vizyon",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Emerald Green", "canonical": "oklch(69.85% 0.198 153.6)", "tonalRamp": ["#022c22", "#064e3b", "#0f766e", "#0d9488", "#14b8a6", "#5eead4", "#ccfbf1", "#f0fdfa"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Linen Background", "canonical": "oklch(98.8% 0.003 85)", "tonalRamp": ["#111827", "#1f2937", "#374151", "#4b5563", "#9ca3af", "#d1d5db", "#f3f4f6", "#fcfbfa"] },
+      "neutral-surface": { "role": "neutral", "displayName": "Oatmeal Surface", "canonical": "oklch(96.2% 0.006 85)", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#94a3b8", "#cbd5e1", "#f1f5f9", "#f4f3ef"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Title", "purpose": "Main dashboard title and prominent headers." },
+      "body": { "displayName": "Body Text", "purpose": "Descriptions, logs, and labels." }
+    },
+    "shadows": [
+      { "name": "ambient-low", "value": "0 2px 8px rgba(0, 0, 0, 0.05)", "purpose": "Subtle border hover effect." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for navigation transition and status change." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard action button used across the application.",
+      "html": "<button class=\"ds-btn-primary\">KAYDET</button>",
+      "css": ".ds-btn-primary { background: #10b981; color: #fcfbfa; padding: 0.6rem 1.2rem; font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #059669; transform: translateY(-1px); }"
+    },
+    {
+      "name": "Oatmeal Card",
+      "kind": "card",
+      "description": "Base card container for tasks and logs.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Görev Başlığı</h3><p class=\"ds-card-desc\">Görev detay açıklaması burada yer alır.</p></div>",
+      "css": ".ds-card { background: #f4f3ef; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; } .ds-card-title { font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 600; color: #1a1e1b; margin-bottom: 0.5rem; } .ds-card-desc { font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #6b726c; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Editorial Sanctuary",
+    "overview": "Vizyon is built around a clean, structured interface inspired by physical editorial spreads. It rejects dark, low-contrast terminal styles in favor of a soft, warm off-white linen background paired with sharp charcoal typography. High-contrast indicators clearly display user progress without distracting clutter.",
+    "keyCharacteristics": [
+      "Soft Warmth: Off-white linen and warm gray base tones replace cold pure-whites and flat grays.",
+      "Typographic Authority: Heavy sans-serif display headers paired with balanced, readable body line lengths.",
+      "Functional Contrast: Color is used strictly for state indicators (Completed, In Progress, Failed) and focal actions."
+    ],
+    "rules": [
+      { "name": "The 10% Accent Rule", "body": "Colored accents (emerald, amber, crimson) must be reserved for state representation and critical buttons. Decorative color splashes are prohibited.", "section": "colors" },
+      { "name": "The Pretty Wrap Rule", "body": "All headings must use text-wrap: balance and body copy must use text-wrap: pretty to ensure optical alignment and eliminate typographic orphans.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Cards, inputs, and sidebars remain flat against their background. Light ambient shadows appear only on interactive hover states or elevated toast notifications.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do maintain contrast ratios of at least 4.5:1 for body copy against linen and oatmeal backgrounds.",
+      "Do keep cards and calendar cells flat at rest.",
+      "Do use numerical rankings (1., 2., 3.) in lists rather than gamified medal/cup graphics."
+    ],
+    "donts": [
+      "Don't use medal, trophy, or cup symbols anywhere on the dashboard or leaderboard.",
+      "Don't use side-stripe borders (colored borders thicker than 1px on one side only) on cards or tasks.",
+      "Don't use gradient text overlay layouts.",
+      "Don't use low-contrast gray placeholder text that fails contrast accessibility."
+    ]
+  }
+}
